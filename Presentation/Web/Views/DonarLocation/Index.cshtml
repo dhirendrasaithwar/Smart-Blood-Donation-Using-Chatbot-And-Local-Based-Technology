@@ -1,0 +1,278 @@
+@{
+    ViewData["Title"] = "Find Donor";
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var message = ViewBag.Message;
+}
+<style>
+    .header {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .hero-search {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: 1000px;
+        background: white;
+        padding: 45px;
+        border-radius: 18px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        border-top: 5px solid #dc3545;
+        text-align: center;
+    }
+
+    .search-title {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #dc3545;
+    }
+
+    .form-control-lg {
+        height: 55px;
+        font-size: 16px;
+    }
+
+    .btn-red {
+        background-color: #dc3545;
+        color: white;
+        padding: 12px;
+        font-size: 18px;
+    }
+
+        .btn-red:hover {
+            background-color: #bb2d3b;
+        }
+
+    .table thead {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .badge-blood {
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .loading-box {
+        display: none;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>🩸 Find Blood Donor Nearby</h2>
+        <p>Search donors using City, Street and Blood Group</p>
+    </div>
+    @if (string.IsNullOrWhiteSpace(message))
+    {
+        <p style="color: red">@message</p>
+    }
+    <!-- SEARCH -->
+    <div class="hero-search">
+        <div class="search-box">
+
+            <div class="search-title">🔍 Search Donors</div>
+
+            <form id="searchForm">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <input type="text" id="city" class="form-control form-control-lg"
+                               placeholder="🏙️ City Name">
+                    </div>
+
+                    <div class="col-md-4">
+                        <input type="text" id="street" class="form-control form-control-lg"
+                               placeholder="🛣️ Street Name">
+                    </div>
+
+                    <div class="col-md-4">
+                        <select id="bloodGroup" class="form-control form-control-lg">
+                            <option value="">🩸 Blood Group</option>
+                            @foreach (var blood in _staticListService.BloodTypes())
+                            {
+                                <option value="@blood.Value">@blood.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-red btn-lg w-100">
+                            🔍 Search Donor
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- LOADING -->
+    <div id="loading" class="loading-box">
+        <div class="spinner-border text-danger"></div>
+        <p>Searching donors...</p>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>Street</th>
+                    <th>Blood Group</th>
+                    <th>Contact</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- ✅ REQUEST MODAL -->
+<div class="modal fade" id="requestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" action="/DonarLocation/RequestDoner">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Donation Request</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    @Html.AntiForgeryToken()
+
+                    <!-- REQUIRED FOR MODEL BINDING -->
+                    <input type="hidden" name="UserId" id="requestUserId" />
+
+                    <div class="mb-3">
+                        <label>Date</label>
+                        <input type="date" name="DonationDate" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Time</label>
+                        <input type="time" name="DonationTime" class="form-control" required />
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Send Request
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("searchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        let city = document.getElementById("city").value.trim();
+        let street = document.getElementById("street").value.trim();
+        let blood = document.getElementById("bloodGroup").value;
+
+        if (!blood || (!city && !street)) {
+            alert("Please select Blood Group and either City or Street");
+            return;
+        }
+
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("resultBody").innerHTML = "";
+
+        let url = `/DonarLocation/Search?streetName=${encodeURIComponent(street)}&cityName=${encodeURIComponent(city)}&bloodGroupId=${blood}`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+
+                let table = document.getElementById("resultBody");
+                table.innerHTML = "";
+
+                document.getElementById("loading").style.display = "none";
+
+                if (!data || data.length === 0) {
+                    table.innerHTML = "<tr><td colspan='6'>No donors found</td></tr>";
+                    return;
+                }
+
+                data.forEach(d => {
+
+                    let actionHtml = "";
+
+                    // 🔥 ELIGIBILITY CHECK
+                    if (d.status == "0") {
+                        actionHtml = `
+                            <button type="button"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="openRequestModal(${d.donarId})">
+                                ❤️ Request
+                            </button>
+                        `;
+                    } else {
+                        actionHtml = `
+                            <span class="text-warning fw-bold">
+                                ⏳ Need to wait 3 months
+                            </span>
+                        `;
+                    }
+
+                    table.innerHTML += `
+                        <tr>
+                            <td>${d.donarName}</td>
+                            <td>${d.cityName}</td>
+                            <td>${d.streetName}</td>
+                            <td><span class="badge-blood">${d.bloodTypeName}</span></td>
+                            <td>${d.phoneNumber}</td>
+                            <td>
+                                ${actionHtml}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+            })
+            .catch(() => {
+                alert("Error fetching donors");
+                document.getElementById("loading").style.display = "none";
+            });
+    });
+
+    function openRequestModal(donorId) {
+        document.getElementById("requestUserId").value = donorId;
+
+        var modal = new bootstrap.Modal(document.getElementById('requestModal'));
+        modal.show();
+    }
+</script>

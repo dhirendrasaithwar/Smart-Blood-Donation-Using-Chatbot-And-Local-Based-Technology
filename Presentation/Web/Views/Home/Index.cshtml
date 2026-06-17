@@ -1,0 +1,245 @@
+﻿@model Common.UserAndBloodCount
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@{
+    var userName = User.Identity.IsAuthenticated ? User.Identity.Name : "";
+    var hour = DateTime.Now.Hour;
+
+    string greeting =
+        hour < 12 ? "Good Morning" :
+        hour < 18 ? "Good Afternoon" :
+        "Good Evening";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="container my-4">
+
+        <div class="p-4 rounded-3 text-white mb-4"
+             style="background: linear-gradient(135deg,#dc3545,#7E3517);">
+
+            <h2 class="fw-bold mb-1">@greeting, @userName 👋</h2>
+            <p class="mb-0">Welcome back to Blood Donation Dashboard ❤️</p>
+
+        </div>
+
+        @if (User.IsInRole("SuperAdmin"))
+        {
+            <div class="row g-3 mb-4">
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Users</h6>
+                            <h3 class="text-danger">@Model?.TotalUser</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Total Requests</h6>
+                            <h3 class="text-danger">@Model?.TotalBloodRequest</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted">Pending Requests</h6>
+                            <h3 class="text-danger">@Model?.PendingRequest</h3>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6>Total</h6>
+                        <h4 class="text-danger">@Model?.TotalBloodRequestOfUser</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6>Pending</h6>
+                        <h4 class="text-danger">@Model?.PendingRequestOfUser</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6>Completed</h6>
+                        <h4 class="text-danger">@Model?.CompletedRequestOfUser</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h6>Unmanaged</h6>
+                        <h4 class="text-danger">@Model?.NotManagedRequestOfUser</h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white">
+                Blood Stock Information
+            </div>
+            <div class="card-body p-0">
+
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Blood Type</th>
+                            <th>In Hold</th>
+                            <th>Reserve</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.BloodStockInfo != null && Model.BloodStockInfo.Any())
+                        {
+                            foreach (var stock in Model.BloodStockInfo)
+                            {
+                                <tr>
+                                    <td>@stock.Item1</td>
+                                    <td>@stock.Item2</td>
+                                    <td>@stock.Item3</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center">No data available</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="container my-5">
+
+        <div class="text-center mb-5">
+
+            <h1 class="fw-bold text-danger">Blood Donation Saves Lives ❤️</h1>
+
+            <p class="lead text-muted mt-3">
+                One donation can save up to 3 lives. Be a hero today.
+            </p>
+
+            <a class="btn btn-danger btn-lg me-2"
+               asp-controller="User"
+               asp-action="Register">
+                Join Now
+            </a>
+
+            <a class="btn btn-outline-danger btn-lg"
+               asp-controller="User"
+               asp-action="Login">
+                Login
+            </a>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center p-3">
+                    <h4 class="text-danger">Save Lives</h4>
+                    <p>Every donation can help patients in emergencies.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center p-3">
+                    <h4 class="text-danger">Quick Process</h4>
+                    <p>Donation takes only 10–15 minutes of your time.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 text-center p-3">
+                    <h4 class="text-danger">Always Needed</h4>
+                    <p>Hospitals constantly require blood donations.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+}
+
+<hr />
+
+<div class="row text-center my-5">
+
+    <div class="col-md-4">
+        <div class="p-4 shadow rounded">
+            <h2 class="text-danger counter" data-target="3">0</h2>
+            <p>Lives Saved</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="p-4 shadow rounded">
+            <h2 class="text-danger counter" data-target="15">0</h2>
+            <p>Minutes Needed</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="p-4 shadow rounded">
+            <h2 class="text-danger counter" data-target="37">0</h2>
+            <p>Seconds to Help</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll('.counter').forEach(counter => {
+
+        let target = +counter.getAttribute("data-target");
+        let current = 0;
+
+        function update() {
+            current += Math.ceil(target / 100);
+            if (current < target) {
+                counter.innerText = current;
+                requestAnimationFrame(update);
+            } else {
+                counter.innerText = target;
+            }
+        }
+
+        update();
+    });
+
+});
+</script>

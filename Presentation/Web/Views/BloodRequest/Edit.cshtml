@@ -1,0 +1,121 @@
+﻿@model Common.UpdateBloodRequest
+
+<style>
+    body {
+        background: #f8f9fa;
+    }
+
+    .blood-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .blood-header {
+        background: linear-gradient(135deg, #dc3545, #a71d2a);
+        color: white;
+        padding: 14px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #7E3517;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.15);
+    }
+
+    .btn-blood {
+        background: #dc3545;
+        color: white;
+        border-radius: 8px;
+    }
+
+    .btn-blood:hover {
+        background: #a71d2a;
+        color: white;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-5">
+
+    <div class="card blood-card w-100" style="max-width:500px;">
+
+        <div class="blood-header">
+            Update Blood Request
+        </div>
+
+        <div class="card-body p-4">
+
+            @if (ViewBag.message != null)
+            {
+                <div class="text-danger text-center mb-3">
+                    @ViewBag.message
+                </div>
+            }
+
+            <form method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="BloodRequestId" />
+
+                <div class="mb-3">
+                    <label class="form-label">Blood Type</label>
+                    <select class="form-control form-select" asp-for="BloodTypeId">
+                        @foreach (var blood in _staticListService.BloodTypes())
+                        {
+                            <option value="@blood.Value">@blood.Text</option>
+                        }
+                    </select>
+                    <span asp-validation-for="BloodTypeId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" class="form-control" asp-for="Quantity" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Urgency</label>
+                    <select class="form-control form-select" asp-for="UrgencyType">
+                        <option value="Normal">Normal</option>
+                        <option value="Very Urgent">Very Urgent</option>
+                    </select>
+                    <span asp-validation-for="UrgencyType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Required Date</label>
+                    <input type="date" class="form-control" asp-for="RequiredDate" />
+                    <span asp-validation-for="RequiredDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" asp-for="Location" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-blood w-100">
+                    Update Request
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

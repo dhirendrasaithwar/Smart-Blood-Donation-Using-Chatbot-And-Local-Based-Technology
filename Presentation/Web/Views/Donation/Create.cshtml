@@ -1,0 +1,45 @@
+﻿@model Common.CreateDonation
+
+<div class="container my-5 d-flex justify-content-center">
+
+    <div class="card shadow-sm border-0 w-100" style="max-width: 500px;">
+
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Create Donation</h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.message != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.message
+                </div>
+            }
+
+            <form method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Donation Date</label>
+                    <input type="date" class="form-control" asp-for="DonationDate" />
+                    <span asp-validation-for="DonationDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" asp-for="Location" placeholder="Enter donation location" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-danger w-100">
+                    Create Donation
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

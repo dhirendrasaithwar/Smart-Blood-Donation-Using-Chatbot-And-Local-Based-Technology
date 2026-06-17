@@ -1,0 +1,156 @@
+﻿@model List<Common.BloodRequestViewModel>
+@{
+    var message = ViewBag.message;
+}
+
+<style>
+    body {
+        background: #f8f9fa;
+    }
+
+    .blood-card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        transition: 0.2s;
+        overflow: visible !important;
+    }
+
+    .blood-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .blood-header {
+        background: linear-gradient(135deg, #dc3545, #a71d2a);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 14px 14px 0 0;
+        font-weight: 600;
+    }
+
+    .badge-status {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-approved { background: #d1e7dd; color: #0f5132; }
+    .status-rejected { background: #f8d7da; color: #842029; }
+
+    .btn-blood {
+        background: #dc3545;
+        color: white;
+        border-radius: 8px;
+    }
+
+    .btn-blood:hover {
+        background: #a71d2a;
+        color: white;
+    }
+
+    /* 🔥 IMPORTANT FIX */
+    .dropdown,
+    .dropdown-menu,
+    .card,
+    .card-body {
+        overflow: visible !important;
+    }
+
+    .dropdown-menu {
+        z-index: 9999 !important;
+    }
+</style>
+
+<div class="container py-4">
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert alert-danger">
+            @message
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-danger fw-bold">My Blood Requests</h4>
+
+        <a asp-action="RequestBlood" class="btn btn-blood">
+            + Request Blood
+        </a>
+    </div>
+
+    <div class="row">
+
+        @if (Model != null)
+        {
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var item = Model[i];
+
+                <div class="col-md-6 col-lg-4 mb-4">
+
+                    <div class="card blood-card">
+
+                        <div class="blood-header">
+                            Request #@(i + 1)
+                        </div>
+
+                        <div class="card-body">
+
+                            <p><strong>Blood Type:</strong> @item.BloodType</p>
+                            <p><strong>Urgency:</strong> @item.UrgencyType</p>
+                            <p><strong>Quantity:</strong> @item.Quantity</p>
+                            <p><strong>Required Date:</strong> @item.RequiredDate</p>
+                            <p><strong>Location:</strong> @item.Location</p>
+
+                            <p class="mt-2">
+                                <strong>Status:</strong>
+                                <span class="badge-status
+                                    @(item.Status == "Pending" ? "status-pending" :
+                                      item.Status == "Approved" ? "status-approved" :
+                                      "status-rejected")">
+                                    @item.Status
+                                </span>
+                            </p>
+
+                            <!-- ✅ FIXED DROPDOWN -->
+                            <div class="dropdown mt-3">
+
+                                <button class="btn btn-blood btn-sm dropdown-toggle w-100"
+                                        data-bs-toggle="dropdown"
+                                        data-bs-display="static">
+                                    Action
+                                </button>
+
+                                <ul class="dropdown-menu w-100 dropdown-menu-end">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-action="RequestCompleted"
+                                           asp-route-bloodRequestId="@item.BloodRequestId">
+                                            Completed
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           asp-action="CannotManageBlood"
+                                           asp-route-bloodRequestId="@item.BloodRequestId">
+                                            Cannot Manage
+                                        </a>
+                                    </li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        }
+
+    </div>
+</div>

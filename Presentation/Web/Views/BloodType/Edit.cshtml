@@ -1,0 +1,41 @@
+﻿@model Common.UpdateBloodType
+
+<div class="container my-5 d-flex justify-content-center">
+
+    <div class="card shadow-sm border-0 w-100" style="max-width: 500px;">
+
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Update Blood Type</h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.message != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.message
+                </div>
+            }
+
+            <form method="post">
+
+                <input type="hidden" asp-for="BloodTypeId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Blood Type</label>
+                    <input type="text" class="form-control" asp-for="BloodTypes" placeholder="e.g. A+, B-, O+" />
+                    <span asp-validation-for="BloodTypes" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-danger w-100">
+                    Update Blood Type
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

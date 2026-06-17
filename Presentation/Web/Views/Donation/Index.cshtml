@@ -1,0 +1,74 @@
+﻿@model List<Common.DonationViewModel>
+
+<div class="container my-4">
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Donation List</h5>
+
+            <a asp-controller="Donation"
+               asp-action="Create"
+               class="btn btn-light btn-sm text-danger fw-bold">
+                + Create Donation
+            </a>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model != null && Model.Count > 0)
+            {
+                <div class="row g-3">
+
+                    @for (var i = 0; i < Model.Count; i++)
+                    {
+                        <div class="col-md-6 col-lg-4">
+
+                            <div class="card h-100 border-danger shadow-sm">
+
+                                <div class="card-body">
+
+                                    <h6 class="text-danger fw-bold">
+                                        🩸 @Model[i].BloodType
+                                    </h6>
+
+                                    <p class="mb-1">
+                                        <strong>Donation Date:</strong><br />
+                                        @Model[i].DonationDate.ToString("dd MMM yyyy")
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Location:</strong><br />
+                                        @Model[i].Location
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Created By:</strong><br />
+                                        @Model[i].CreatedBy
+                                    </p>
+
+                                    <small class="text-muted">
+                                        Created: @Model[i].CreatedDate.ToString("dd MMM yyyy")
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted py-4">
+                    No donations found
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,77 @@
+﻿@model List<Common.DonationList>
+
+<div class="container my-4">
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Donation List</h5>
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-hover align-middle" id="example">
+
+                <thead class="table-danger text-dark">
+                    <tr>
+                        <th>S.N</th>
+                        <th>Donation Date</th>
+                        <th>Blood Type</th>
+                        <th>Location</th>
+                        <th>Username</th>
+                        <th>Phone Number</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        for (var i = 0; i < Model.Count; i++)
+                        {
+                            <tr>
+                                <td>@(i + 1)</td>
+
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @Model[i].DonationDate
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-danger">
+                                        @Model[i].BloodType
+                                    </span>
+                                </td>
+
+                                <td>@Model[i].Location</td>
+                                <td>@Model[i].UserName</td>
+                                <td>@Model[i].PhoneNumber</td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                No donations found
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    new DataTable('#example', {
+        rowReorder: true
+    });
+</script>

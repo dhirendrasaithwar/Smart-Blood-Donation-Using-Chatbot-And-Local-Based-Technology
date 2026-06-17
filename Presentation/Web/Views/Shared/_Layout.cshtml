@@ -1,0 +1,421 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] LifeBachau</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <link href="https://cdn.datatables.net/2.1.2/css/dataTables.bootstrap5.css" rel="stylesheet" />
+</head>
+
+<style>
+body { margin:0; }
+
+.layout { display:flex; min-height:100vh; }
+
+/* SIDEBAR */
+.sidebar {
+    width:250px;
+    background:#fff;
+    border-right:1px solid #dee2e6;
+    display:flex;
+    flex-direction:column;
+}
+
+.brand {
+    padding:15px;
+    font-weight:bold;
+    border-bottom:1px solid #ddd;
+}
+
+.sidebar ul { list-style:none; padding:0; margin:0; }
+
+.sidebar li a {
+    display:flex;
+    gap:10px;
+    padding:10px 15px;
+    text-decoration:none;
+    color:#333;
+    align-items:center;
+}
+
+.sidebar li a.active {
+    background:#fde8e8;
+    color:red;
+    font-weight:600;
+}
+
+.sidebar li a:hover { background:#f5f5f5; }
+
+/* TOPBAR */
+.topbar {
+    height:60px;
+    border-bottom:1px solid #dee2e6;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+    background:#fff;
+}
+
+.search-box {
+    width:320px;
+    position:relative;
+}
+
+.search-box input {
+    width:100%;
+    padding:7px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+.search-result {
+    position:absolute;
+    top:40px;
+    width:100%;
+    background:white;
+    border:1px solid #ddd;
+    display:none;
+    z-index:999;
+}
+
+.search-result a {
+    display:block;
+    padding:8px;
+    text-decoration:none;
+    color:#333;
+}
+
+.search-result a:hover { background:#eee; }
+
+.content { flex:1; background:#f8f9fa; }
+
+.main { padding:20px; }
+
+/* CHATBOT */
+.chat-user {
+    background:#dc3545;
+    color:white;
+    padding:8px 12px;
+    border-radius:15px 15px 0 15px;
+    align-self:flex-end;
+    margin:5px 0;
+    max-width:80%;
+}
+
+.chat-bot {
+    background:#e9ecef;
+    color:black;
+    padding:8px 12px;
+    border-radius:15px 15px 15px 0;
+    align-self:flex-start;
+    margin:5px 0;
+    max-width:80%;
+}
+
+.category-chip {
+    padding:6px 12px;
+    border-radius:20px;
+    border:1px solid #dc3545;
+    background:white;
+    color:#dc3545;
+    cursor:pointer;
+    font-size:13px;
+}
+</style>
+
+<body>
+
+@if (User.Identity.IsAuthenticated)
+{
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+        <div class="brand">
+            <a asp-controller="Home" asp-action="Index" style="text-decoration:none;color:#7E3517;">
+                🩸 BloodDonation
+            </a>
+        </div>
+
+        <ul>
+
+            <li>
+                <a asp-controller="Home" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Home"?"active":"")">
+                    🏠 Dashboard
+                </a>
+            </li>
+
+            <li>
+                <a asp-controller="Stock" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Stock"?"active":"")">
+                    📦 Stock
+                </a>
+            </li>
+
+            <li>
+                <a asp-controller="BloodRequest" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="BloodRequest"?"active":"")">
+                    🩸 My Request
+                </a>
+            </li>
+
+            <li>
+                <a asp-controller="Donation" asp-action="Index"
+                   class="@(ViewContext.RouteData.Values["controller"]?.ToString()=="Donation"?"active":"")">
+                    💉 Donation
+                </a>
+            </li>
+
+            @if (User.IsInRole("SuperAdmin"))
+            {
+                <li>
+                    <a asp-controller="ChatBot" asp-action="AddQuestion">🤖 Chatbot</a>
+                </li>
+
+                <li>
+                    <a asp-controller="BloodType" asp-action="Index">🧪 Blood Type</a>
+                </li>
+
+                <li>
+                    <a asp-controller="BloodRequest" asp-action="AllBoodRequest">📊 Total Request</a>
+                </li>
+
+                <li>
+                    <a asp-controller="Donation" asp-action="DonationList">📋 Donation List</a>
+                </li>
+            }
+            <li>
+                <a asp-controller="DonarLocation" asp-action="Index">🔍 Search Donor</a>
+            </li>
+            <li>
+                <a asp-controller="DonarLocation" asp-action="RequestList">📋 Incoming Request List</a>
+            </li>
+            <li>
+                <a asp-controller="DonarLocation" asp-action="MyPersonalRequest">📋 Personal Requested List</a>
+            </li>
+            <li>
+                <a asp-controller="User" asp-action="ChangePassword">🔒 Change Password</a>
+            </li>
+
+            <li>
+                <a asp-controller="User" asp-action="Logout">🚪 Logout</a>
+            </li>
+
+        </ul>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+
+            <a asp-controller="Home" asp-action="Index" style="font-weight:bold;text-decoration:none;">
+                BloodDonation
+            </a>
+
+            <div class="search-box">
+                <input id="searchInput" type="text" placeholder="Search menu..." />
+                <div id="searchResult" class="search-result"></div>
+            </div>
+
+            <div>@User.Identity.Name</div>
+
+        </div>
+
+        <div class="main">
+            @RenderBody()
+        </div>
+
+    </div>
+
+</div>
+}
+else
+{
+    <div class="topbar">
+        <a asp-controller="Home" asp-action="Index" style="font-weight:bold;text-decoration:none;">
+            🩸 BloodDonation
+        </a>
+
+        <a asp-controller="User" asp-action="Login" class="btn btn-danger btn-sm">Login</a>
+    </div>
+
+    <div class="main">
+        @RenderBody()
+    </div>
+}
+
+<!-- CHATBOT -->
+<button id="chatBtn"
+        style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;
+        border-radius:50%;background:#dc3545;color:white;font-size:22px;z-index:9999;">
+    🤖
+</button>
+
+<div id="chatPanel"
+     style="position:fixed;top:0;right:-400px;width:380px;height:100%;
+     background:#f8f9fa;z-index:9998;transition:0.3s;
+     box-shadow:-3px 0 10px rgba(0,0,0,0.2);
+     display:flex;flex-direction:column;">
+
+    <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">🤖 Chatbot</h6>
+        <div>
+            <button id="clearChat" class="btn btn-sm btn-warning me-2">Clear</button>
+            <button id="closeChat" class="btn btn-sm btn-dark">X</button>
+        </div>
+    </div>
+
+    <div id="chatBox" style="flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;"></div>
+
+    <div id="categoryRow" style="padding:10px;border-top:1px solid #ddd;background:white;display:flex;flex-wrap:wrap;gap:6px;"></div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const items = [
+    { name:"Dashboard", url:"/Home/Index" },
+    { name:"Stock", url:"/Stock/Index" },
+    { name:"My Request", url:"/BloodRequest/Index" },
+    { name:"Donation", url:"/Donation/Index" },
+    { name:"Chatbot", url:"/ChatBot/AddQuestion" },
+    { name:"Blood Type", url:"/BloodType/Index" },
+    { name:"Total Request", url:"/BloodRequest/AllBoodRequest" },
+    { name:"Donation List", url:"/Donation/DonationList" },
+    { name:"Change Password", url:"/User/ChangePassword" }
+];
+
+const input = document.getElementById("searchInput");
+const result = document.getElementById("searchResult");
+
+input?.addEventListener("input", function () {
+    let val = this.value.toLowerCase();
+    if (!val) { result.style.display="none"; return; }
+
+    let filtered = items.filter(x => x.name.toLowerCase().includes(val));
+
+    result.innerHTML = filtered.map(x =>
+        `<a href="${x.url}">${x.name}</a>`
+    ).join("");
+
+    result.style.display="block";
+});
+
+document.addEventListener("click", e => {
+    if (!e.target.closest(".search-box")) result.style.display="none";
+});
+
+/* CHATBOT */
+document.addEventListener("DOMContentLoaded", function () {
+
+    const chatBtn = document.getElementById("chatBtn");
+    const chatPanel = document.getElementById("chatPanel");
+    const closeChat = document.getElementById("closeChat");
+    const chatBox = document.getElementById("chatBox");
+    const categoryRow = document.getElementById("categoryRow");
+    const clearChat = document.getElementById("clearChat");
+
+    let allQuestions = [];
+    let index = 0;
+    const size = 5;
+
+    chatBtn.onclick = () => {
+        chatPanel.style.right = "0";
+        chatBox.innerHTML = "";
+        categoryRow.innerHTML = "";
+        loadCategories();
+    };
+
+    closeChat.onclick = () => chatPanel.style.right = "-400px";
+
+    clearChat.onclick = () => {
+        chatBox.innerHTML = "";
+        categoryRow.innerHTML = "";
+        allQuestions = [];
+        index = 0;
+        loadCategories();
+    };
+
+    function user(t){
+        let d=document.createElement("div");
+        d.className="chat-user";
+        d.innerText=t;
+        chatBox.appendChild(d);
+    }
+
+    function bot(t){
+        let d=document.createElement("div");
+        d.className="chat-bot";
+        d.innerText=t;
+        chatBox.appendChild(d);
+    }
+
+    function loadCategories(){
+        fetch('/chatbot/getcategory')
+        .then(r=>r.json())
+        .then(data=>{
+            bot("Select category 👇");
+            data.forEach(c=>{
+                let b=document.createElement("button");
+                b.className="category-chip";
+                b.innerText=c;
+                b.onclick=()=>{ user(c); loadQuestions(c); };
+                categoryRow.appendChild(b);
+            });
+        });
+    }
+
+    function loadQuestions(cat){
+        fetch(`/chatbot/questions?category=${encodeURIComponent(cat)}`)
+        .then(r=>r.json())
+        .then(data=>{
+            allQuestions=data;
+            index=0;
+            render();
+        });
+    }
+
+    function render(){
+        let next=allQuestions.slice(index,index+size);
+        next.forEach(q=>{
+            let d=document.createElement("div");
+            d.className="chat-bot";
+            d.style.cursor="pointer";
+            d.innerText=q.question;
+            d.onclick=()=>{ user(q.question); loadAnswer(q.id); };
+            chatBox.appendChild(d);
+        });
+        index+=size;
+
+        if(index<allQuestions.length){
+            let btn=document.createElement("button");
+            btn.innerText="Load More";
+            btn.className="btn btn-sm btn-outline-danger mt-2";
+            btn.onclick=render;
+            chatBox.appendChild(btn);
+        }
+    }
+
+    function loadAnswer(id){
+        fetch(`/chatbot/answer?id=${id}`)
+        .then(r=>r.json())
+        .then(d=>bot(d.answer));
+    }
+});
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

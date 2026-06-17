@@ -1,0 +1,117 @@
+@model List<Common.ViewModel.SearchViewModel.RequestDonarResult>
+
+@{
+ViewData["Title"] = "Donation Schedule List";
+}
+
+<style>
+    .header {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .table thead {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .card-box {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .badge-status {
+        padding: 5px 10px;
+        border-radius: 6px;
+        color: white;
+        font-size: 12px;
+        display: inline-block;
+    }
+
+    .accepted { background: green; }
+    .pending { background: orange; }
+    .rejected { background: gray; }
+</style>
+
+<div class="container mt-4">
+
+    <div class="header">
+        <h3>🩸 Donation Schedule List</h3>
+        <p>All donor appointments with details</p>
+    </div>
+
+    <div class="card-box">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered text-center align-middle">
+
+                <thead>
+                <tr>
+                    <th>Donor Name</th>
+                    <th>Address</th>
+                    <th>Phone Number</th>
+                    <th>Donation Date</th>
+                    <th>Donation Time</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                @if (Model != null && Model.Any())
+                {
+                foreach (var item in Model)
+                {
+                var statusRaw = item.Status ?? "";
+                var status = statusRaw.Trim().ToLower();
+
+                string cssClass = status switch
+                {
+                "accepted" => "accepted",
+                "approve" => "accepted",
+                "pending" => "pending",
+                "rejected" => "rejected",
+                "reject" => "rejected",
+                _ => "pending"
+                };
+
+                <tr>
+                    <td>@item.DonarName</td>
+                    <td>@item.DonationAddress</td>
+                    <td>@item.DonationPhoneNumber</td>
+                    <td>@item.DonationDate</td>
+                    <td>@item.DonationTime</td>
+
+                    <td>
+                                <span class="badge-status @cssClass">
+                                    @item.Status
+                                </span>
+                    </td>
+                </tr>
+                }
+                }
+                else
+                {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No records found
+                    </td>
+                </tr>
+                }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

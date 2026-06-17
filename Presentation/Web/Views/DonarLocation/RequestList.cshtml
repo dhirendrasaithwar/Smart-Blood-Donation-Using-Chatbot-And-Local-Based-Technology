@@ -1,0 +1,180 @@
+@model List<Common.ViewModel.SearchViewModel.RequestDonarResult>
+
+@{
+    ViewData["Title"] = "Donation Requests";
+}
+
+<style>
+    .header {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .table thead {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .badge-status {
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+        font-size: 13px;
+    }
+
+    .pending { background: orange; }
+    .accepted { background: green; }
+    .rejected { background: gray; }
+
+    .btn-accept {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-reject {
+        background: #dc3545;
+        color: white;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h3>📋 Donation Requests</h3>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle">
+
+            <thead>
+                <tr>
+                    <th>Requester</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Requester Phone</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (Model?.Any() == true)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.RequesterName</td>
+                            <td>@item.RequesterAddress</td>
+
+                            <!-- 🔴 FIXED STATUS HANDLING -->
+                            <td>
+                                @{
+                                    var status = (item.Status ?? "").Trim().ToLower();
+
+                                    string cssClass =
+                                        status == "pending" ? "pending" :
+                                        status == "accepted" ? "accepted" :
+                                        (status == "rejected" || status == "declined" || status == "reject") ? "rejected" :
+                                        "pending";
+                                }
+
+                                <span class="badge-status @cssClass">
+                                    @item.Status
+                                </span>
+                            </td>
+
+                            <td>@item.DonationDate</td>
+                            <td>@item.DonationTime</td>
+
+                            <td>@item.RequesterPhoneNumber</td>
+
+                            <td>
+
+                                @if ((item.Status ?? "").ToLower() == "pending")
+                                {
+                                    <!-- ACCEPT MODAL BUTTON -->
+                                    <button class="btn btn-sm btn-accept"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#acceptModal"
+                                            onclick="setRequestId(@item.Id)">
+                                        ✅ Accept
+                                    </button>
+
+                                    <!-- REJECT -->
+                                    <form method="post" asp-action="Reject" style="display:inline;">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit"
+                                                class="btn btn-sm btn-reject"
+                                                onclick="return confirm('Are you sure you want to reject this request?')">
+                                            ❌ Reject
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No any request found
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+<div class="modal fade" id="acceptModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" asp-action="Accept">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Accept Donation Request</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="Id" name="Id" />
+
+                    <p>Are you sure you want to accept this request?</p>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Confirm Accept
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function setRequestId(id) {
+        document.getElementById("Id").value = id;
+    }
+</script>

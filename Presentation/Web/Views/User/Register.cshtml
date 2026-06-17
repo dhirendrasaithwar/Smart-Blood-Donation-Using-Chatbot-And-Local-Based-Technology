@@ -1,0 +1,190 @@
+﻿@model Common.Register
+
+<style>
+    body {
+        background: #f8f9fa;
+    }
+
+    .blood-card {
+        border-radius: 16px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .blood-header {
+        background: linear-gradient(135deg, #dc3545, #a71d2a);
+        color: white;
+        padding: 18px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #7E3517;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.15);
+    }
+
+    .btn-blood {
+        background: #dc3545;
+        color: white;
+        border-radius: 8px;
+    }
+
+    .btn-blood:hover {
+        background: #a71d2a;
+        color: white;
+    }
+
+    .card-shadow {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center py-5">
+    <div class="card blood-card card-shadow w-100" style="max-width: 900px;">
+
+        <div class="blood-header">
+            Blood Donation Register
+        </div>
+
+        <div class="card-body p-4">
+
+            @if (ViewBag.message != null)
+            {
+                <div class="text-danger text-center mb-3">
+                    @ViewBag.message
+                </div>
+            }
+
+            <form method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Username</label>
+                        <input asp-for="UserName" class="form-control" />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Address</label>
+                        <input asp-for="Address" class="form-control" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Gender</label>
+                        <select asp-for="Gender" class="form-control form-select">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Password</label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Street Name</label>
+                        <input asp-for="StreetName" type="text" aria-label="Lewsiham" class="form-control" />
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">City Name</label>
+                        <input asp-for="CityName" type="text" aria-label="London" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Blood Type</label>
+                        <select asp-for="BloodTypeId" class="form-control form-select">
+                            @foreach (var blood in _staticListService.BloodTypes())
+                            {
+                                <option value="@blood.Value">@blood.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Date of Birth</label>
+                        <input asp-for="DateOfBirth" type="date" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Previous Donate</label>
+                        <select asp-for="IsPreviousDonate" id="IsPreviousDonate" class="form-control form-select">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3" id="lastdonationdate">
+                        <label class="form-label">Last Donation Date</label>
+                        <input asp-for="LastDonationDate" type="date" class="form-control" />
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-blood w-100">Register</button>
+                    </div>
+
+                    <div class="col-12 text-center mt-3">
+                        <a asp-action="Login" class="text-danger">Already have an account? Login</a>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const select = document.getElementById("IsPreviousDonate");
+            const box = document.getElementById("lastdonationdate");
+
+            function toggle() {
+                box.style.display = select.value === "Yes" ? "block" : "none";
+            }
+
+            select.addEventListener("change", toggle);
+            toggle();
+        });
+    </script>
+}

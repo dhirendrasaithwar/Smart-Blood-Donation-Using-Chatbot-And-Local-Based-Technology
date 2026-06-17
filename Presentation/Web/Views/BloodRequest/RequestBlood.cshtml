@@ -1,0 +1,71 @@
+﻿@model Common.CreateBloodRequest
+
+<div class="container my-5 d-flex justify-content-center">
+
+    <div class="card shadow-sm border-0 w-100" style="max-width: 600px;">
+
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Create Blood Request</h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.message != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.message
+                </div>
+            }
+
+            <form method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Blood Type</label>
+                    <select class="form-control form-select" asp-for="BloodTypeId">
+                        @foreach (var blood in _staticListService.BloodTypes())
+                        {
+                            <option value="@blood.Value">@blood.Text</option>
+                        }
+                    </select>
+                    <span asp-validation-for="BloodTypeId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" class="form-control" asp-for="Quantity" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Urgency</label>
+                    <select class="form-control form-select" asp-for="UrgencyType">
+                        <option value="Normal">Normal</option>
+                        <option value="Very Urgent">Very Urgent</option>
+                    </select>
+                    <span asp-validation-for="UrgencyType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Required Date</label>
+                    <input type="date" class="form-control" asp-for="RequiredDate" />
+                    <span asp-validation-for="RequiredDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" asp-for="Location" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-danger w-100">
+                    Request Blood
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
